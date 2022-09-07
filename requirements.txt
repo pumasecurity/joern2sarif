@@ -1,3 +1,6 @@
-sarif-om
-jschema_to_python
-six
+sarif-om==1.0.4
+jschema_to_python==1.2.3
+six==1.16.0
+pbr==5.9.0
+attrs==21.4.0
+jsonpickle==2.2.0
