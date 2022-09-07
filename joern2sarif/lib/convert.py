@@ -320,7 +320,8 @@ def extract_from_file(
                                 sink = {
                                     "filename": os.path.join(
                                         working_dir,
-                                        sink_obj.get("callingMethod").get("filename"),
+                                        sink_obj.get("callingMethod").get(
+                                            "filename"),
                                     ),
                                     "line_number": sink_obj.get("callingMethod").get(
                                         "lineNumber"
@@ -380,7 +381,8 @@ def extract_from_file(
                         rule_id = tmpA[0]
                         fingerprint = tmpA[-1]
                         score = ""
-                        cvss_tag = [t for t in tags if t.get("key") == "cvss_score"]
+                        cvss_tag = [t for t in tags if t.get(
+                            "key") == "cvss_score"]
                         if cvss_tag:
                             score = cvss_tag[0].get("value")
                         if vuln_type == "extscan":
@@ -406,7 +408,8 @@ def extract_from_file(
                         if not location and details.get("dataflow"):
                             dataflows = details.get("dataflow").get("list")
                             if dataflows:
-                                location_list = convert_dataflow(working_dir, dataflows)
+                                location_list = convert_dataflow(
+                                    working_dir, dataflows)
                                 # Take the sink
                                 if location_list:
                                     codeflows = location_list
@@ -527,7 +530,8 @@ def report(
                     om.Invocation(
                         end_time_utc=datetime.datetime.utcnow().strftime(TS_FORMAT),
                         execution_successful=True,
-                        working_directory=om.ArtifactLocation(uri=to_uri(wd_dir_log)),
+                        working_directory=om.ArtifactLocation(
+                            uri=to_uri(wd_dir_log)),
                     )
                 ],
                 conversion={
@@ -536,7 +540,8 @@ def report(
                         execution_successful=True,
                         command_line=tool_args_str,
                         arguments=tool_args,
-                        working_directory=om.ArtifactLocation(uri=to_uri(wd_dir_log)),
+                        working_directory=om.ArtifactLocation(
+                            uri=to_uri(wd_dir_log)),
                         end_time_utc=datetime.datetime.utcnow().strftime(TS_FORMAT),
                     ),
                 },
@@ -603,11 +608,13 @@ def fix_filename(working_dir, filename):
         if WORKSPACE_PREFIX is not None:
             # Make it relative path
             if WORKSPACE_PREFIX == "":
-                filename = re.sub(r"^" + working_dir + "/", WORKSPACE_PREFIX, filename)
+                filename = re.sub(r"^" + working_dir + "/",
+                                  WORKSPACE_PREFIX, filename)
             elif not filename.startswith(working_dir):
                 filename = os.path.join(WORKSPACE_PREFIX, filename)
             else:
-                filename = re.sub(r"^" + working_dir, WORKSPACE_PREFIX, filename)
+                filename = re.sub(r"^" + working_dir,
+                                  WORKSPACE_PREFIX, filename)
     return filename
 
 
@@ -621,11 +628,13 @@ def create_result(tool_name, issue, rules, rule_indices, file_path_list, working
     :param file_path_list: Full file path for any manipulation
     :param working_dir: Working directory
     """
+
     if isinstance(issue, dict):
         issue = issue_from_dict(issue)
 
     issue_dict = issue.as_dict()
-    rule, rule_index = create_or_find_rule(tool_name, issue_dict, rules, rule_indices)
+    rule, rule_index = create_or_find_rule(
+        tool_name, issue_dict, rules, rule_indices)
 
     # Substitute workspace prefix
     # Override file path prefix with workspace
@@ -639,6 +648,8 @@ def create_result(tool_name, issue, rules, rule_indices, file_path_list, working
     )
     thread_flows_list = []
     issue_severity = issue_dict["issue_severity"]
+    score = issue_dict["score"]
+
     fingerprint = {"evidenceFingerprint": issue_dict["line_hash"]}
     if issue_dict.get("codeflows"):
         thread_locations = []
@@ -670,6 +681,7 @@ def create_result(tool_name, issue, rules, rule_indices, file_path_list, working
             markdown=issue_dict["title"],
         ),
         level=level_from_severity(issue_severity),
+        rank=float(score),
         locations=[om.Location(physical_location=physical_location)],
         partial_fingerprints=fingerprint,
         properties={
@@ -878,7 +890,8 @@ def create_or_find_rule(tool_name, issue_dict, rules, rule_indices):
                 "markdown", tool_name, rule_id, issue_dict["test_name"], issue_dict
             ),
         },
-        help_uri=get_url(tool_name, rule_id, issue_dict["test_name"], issue_dict),
+        help_uri=get_url(tool_name, rule_id,
+                         issue_dict["test_name"], issue_dict),
         properties={
             "tags": [tool_name],
             "precision": precision,

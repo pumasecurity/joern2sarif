@@ -55,6 +55,7 @@ class Issue(object):
         self.first_found = None
         self.tags = {}
         self.codeflows = []
+        self.score = ""
 
     def __str__(self):
         return ("Issue: '%s' from %s:%s: Severity: %s Confidence: " "%s at %s:%i") % (
@@ -202,6 +203,7 @@ class Issue(object):
             "tags": self.tags,
             "line_hash": self.line_hash,
             "codeflows": self.codeflows,
+            "score": self.score,
         }
 
         if with_code:
@@ -316,6 +318,8 @@ class Issue(object):
             self.line_hash = data["fingerprint"]
         if "codeflows" in data:
             self.codeflows = data["codeflows"]
+        if "score" in data:
+            self.score = data["score"]
 
 
 def issue_from_dict(data):
