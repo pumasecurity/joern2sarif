@@ -381,10 +381,13 @@ def extract_from_file(
                         rule_id = tmpA[0]
                         fingerprint = tmpA[-1]
                         score = ""
-                        cvss_tag = [t for t in tags if t.get(
-                            "key") == "cvss_score"]
+                        cvss_tag = [t for t in tags if t.get("key") == "cvss_score"]
                         if cvss_tag:
                             score = cvss_tag[0].get("value")
+                        cwe_category = ""
+                        cwe_category_tag = [t for t in tags if t.get("key") == "cwe_category"]
+                        if cwe_category_tag:
+                            cwe_category = cwe_category_tag[0].get("value")
                         if vuln_type == "extscan":
                             location = {
                                 "filename": os.path.join(
@@ -422,6 +425,7 @@ def extract_from_file(
                                     "short_description": vuln["category"],
                                     "description": vuln["description"],
                                     "score": score,
+                                    "cwe_category": cwe_category,
                                     "severity": vuln["severity"],
                                     "line_number": location.get("line_number"),
                                     "filename": location.get("filename"),
@@ -869,6 +873,12 @@ def create_or_find_rule(tool_name, issue_dict, rules, rule_indices):
         return rules[rule_id], rule_indices[rule_id]
     precision = "very-high"
     issue_severity = issue_dict["issue_severity"]
+    cwe_category = issue_dict["cwe_category"]
+
+    tags = ["security"]
+    if issue_dict["cwe_category"]:
+      tags.append("CWE-{}".format(issue_dict["cwe_category"]))
+
     rule = om.ReportingDescriptor(
         id=rule_id,
         name=rule_name,
@@ -893,7 +903,8 @@ def create_or_find_rule(tool_name, issue_dict, rules, rule_indices):
         help_uri=get_url(tool_name, rule_id,
                          issue_dict["test_name"], issue_dict),
         properties={
-            "tags": [tool_name],
+            "security-severity": float(issue_dict["score"]),
+            "tags": tags,
             "precision": precision,
         },
         default_configuration={"level": level_from_severity(issue_severity)},
